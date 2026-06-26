@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Espejo Bíblico</title>
+  <meta name="description" content="Dinámica cristiana para jóvenes: compara de forma reflexiva dos personajes bíblicos." />
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <main class="app-shell">
+    <section class="hero card">
+      <div class="hero__badge">Dinámica cristiana para jóvenes</div>
+      <h1>Espejo Bíblico</h1>
+      <p>
+        Una herramienta sencilla para reflexionar con respeto sobre el carácter, el proceso espiritual
+        y las cualidades que Dios puede formar en nosotros.
+      </p>
+    </section>
+
+    <section class="rules card" aria-labelledby="reglas-title">
+      <h2 id="reglas-title">Antes de iniciar</h2>
+      <p>
+        Esta dinámica no es para burlarse ni señalar defectos. El porcentaje es simbólico y sirve
+        solamente como una guía de conversación espiritual.
+      </p>
+      <div class="rule-grid">
+        <span>No usar para ofender</span>
+        <span>Escuchar con respeto</span>
+        <span>Terminar con una enseñanza</span>
+      </div>
+    </section>
+
+    <section class="form-card card" aria-labelledby="form-title">
+      <h2 id="form-title">Comparar personajes</h2>
+      <form id="compareForm" autocomplete="off">
+        <div class="input-group">
+          <label for="desiredCharacter">Personaje al que me gustaría parecerme</label>
+          <input id="desiredCharacter" name="desiredCharacter" type="text" placeholder="Ejemplo: David" required />
+        </div>
+
+        <div class="input-group">
+          <label for="perceivedCharacter">Personaje al que otros creen que me parezco</label>
+          <input id="perceivedCharacter" name="perceivedCharacter" type="text" placeholder="Ejemplo: Jacob" required />
+        </div>
+
+        <div class="actions">
+          <button type="submit">Comparar personajes</button>
+          <button type="button" class="button-secondary" id="randomExample">Probar ejemplo</button>
+        </div>
+      </form>
+    </section>
+
+    <section id="result" class="result card hidden" aria-live="polite"></section>
+
+    <section class="guide card">
+      <h2>Cómo usarla en la iglesia</h2>
+      <ol>
+        <li>Una persona escribe el personaje que admira.</li>
+        <li>Otra persona, con respeto, sugiere un personaje que refleje su proceso actual.</li>
+        <li>El grupo escucha el resultado y responde: “¿Qué cualidad quiero practicar esta semana?”.</li>
+      </ol>
+    </section>
+  </main>
+
+  <script src="script.js"></script>
+</body>
+</html>
