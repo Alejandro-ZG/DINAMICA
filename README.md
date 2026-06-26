@@ -1,4 +1,4 @@
-# Espejo Bíblico
+# Espejo Bíblico - DINAMICA
 
 Aplicación web sencilla para una dinámica cristiana con jóvenes dentro de la iglesia.
 
@@ -30,12 +30,16 @@ Abre `index.html` en tu navegador.
 
 ## Publicación remota
 
-Revisa `DEPLOY_GITHUB.md` para publicarlo en GitHub Pages.
-
-Si el repositorio se llama `espejo-biblico` y el usuario es `Alejandro-ZG`, el enlace esperado será:
+El repositorio indicado es:
 
 ```txt
-https://alejandro-zg.github.io/espejo-biblico/
+https://github.com/Alejandro-ZG/DINAMICA.git
+```
+
+Cuando actives GitHub Pages, el enlace esperado será:
+
+```txt
+https://alejandro-zg.github.io/DINAMICA/
 ```
 
 ## Nota sobre API
