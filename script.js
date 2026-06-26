@@ -361,15 +361,153 @@ function compareCharacters(desiredInput, perceivedInput) {
   result.scrollIntoView({ behavior: 'smooth', block: 'start' });
 }
 
-form.addEventListener('submit', event => {
+
+const API_URL = (window.ESPEJO_API_URL || '').trim();
+
+function renderLoading() {
+  result.classList.remove('hidden');
+  result.innerHTML = `
+    <div class="result-block loading">
+      <h2>Generando comparación con IA...</h2>
+      <p>Espera unos segundos. La respuesta será simbólica, respetuosa y edificante.</p>
+    </div>
+  `;
+  result.scrollIntoView({ behavior: 'smooth', block: 'start' });
+}
+
+function renderError(message) {
+  result.classList.remove('hidden');
+  result.innerHTML = `
+    <div class="result-block warning">
+      <h2>No se pudo consultar la IA</h2>
+      <p>${message}</p>
+      <p>Usaré la comparación local para que la dinámica pueda continuar.</p>
+    </div>
+  `;
+}
+
+async function compareCharactersWithAI(desiredInput, perceivedInput) {
+  const response = await fetch(API_URL, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({
+      personajeDeseado: desiredInput,
+      personajePercibido: perceivedInput
+    })
+  });
+
+  const data = await response.json().catch(() => ({}));
+
+  if (!response.ok) {
+    throw new Error(data.error || 'El backend respondió con un error.');
+  }
+
+  return data;
+}
+
+function renderAIComparison(data) {
+  const score = Math.max(0, Math.min(100, Math.round(Number(data.porcentaje) || 0)));
+  const desiredTraits = Array.isArray(data.caracteristicasDeseado) ? data.caracteristicasDeseado : [];
+  const perceivedTraits = Array.isArray(data.caracteristicasPercibido) ? data.caracteristicasPercibido : [];
+  const similarities = Array.isArray(data.similitudes) ? data.similitudes : [];
+
+  result.classList.remove('hidden');
+  result.innerHTML = `
+    <div class="result-header">
+      <div class="score-circle" style="--score: ${score}">
+        <div>
+          <strong>${score}%</strong>
+          <span>simbólico</span>
+        </div>
+      </div>
+      <div>
+        <h2>Resultado espiritual con IA</h2>
+        <p>
+          Este porcentaje no define a la persona. Solo ayuda a iniciar una conversación sobre carácter,
+          crecimiento y dirección espiritual.
+        </p>
+      </div>
+    </div>
+
+    <div class="character-grid">
+      <article class="character-card">
+        <div class="label">Personaje que admira</div>
+        <div class="name">${data.personajeDeseado || 'Personaje deseado'}</div>
+        <p>${data.resumenDeseado || 'Resumen no disponible.'}</p>
+        <div class="tags">${renderTags(desiredTraits)}</div>
+      </article>
+
+      <article class="character-card">
+        <div class="label">Personaje que refleja su proceso</div>
+        <div class="name">${data.personajePercibido || 'Personaje percibido'}</div>
+        <p>${data.resumenPercibido || 'Resumen no disponible.'}</p>
+        <div class="tags">${renderTags(perceivedTraits)}</div>
+      </article>
+    </div>
+
+    <div class="result-blocks">
+      <div class="result-block">
+        <h3>Similitudes</h3>
+        <ul>${renderList(similarities)}</ul>
+      </div>
+
+      <div class="result-block">
+        <h3>Contraste</h3>
+        <p>${data.contraste || 'Contraste no disponible.'}</p>
+      </div>
+
+      <div class="result-block">
+        <h3>Reflexión</h3>
+        <p>${data.reflexion || 'Reflexión no disponible.'}</p>
+      </div>
+
+      <div class="result-block verse">
+        <h3>Versículo relacionado</h3>
+        <p><strong>${data.versiculo || 'Filipenses 1:6'}</strong></p>
+      </div>
+
+      <div class="result-block">
+        <h3>Reto de la semana</h3>
+        <p>${data.reto || 'Practicar una cualidad cristiana durante la semana.'}</p>
+      </div>
+    </div>
+  `;
+
+  result.scrollIntoView({ behavior: 'smooth', block: 'start' });
+}
+
+async function compareCharactersSmart(desiredInput, perceivedInput) {
+  if (!API_URL) {
+    compareCharacters(desiredInput, perceivedInput);
+    return;
+  }
+
+  const perceivedKey = normalizeName(perceivedInput);
+  if (sensitiveCharacters.has(perceivedKey)) {
+    renderWarning(perceivedInput);
+    return;
+  }
+
+  try {
+    renderLoading();
+    const data = await compareCharactersWithAI(desiredInput, perceivedInput);
+    renderAIComparison(data);
+  } catch (error) {
+    console.error(error);
+    renderError(error.message || 'Ocurrió un error inesperado.');
+    setTimeout(() => compareCharacters(desiredInput, perceivedInput), 900);
+  }
+}
+
+form.addEventListener('submit', async event => {
   event.preventDefault();
   const data = new FormData(form);
-  compareCharacters(data.get('desiredCharacter'), data.get('perceivedCharacter'));
+  await compareCharactersSmart(data.get('desiredCharacter'), data.get('perceivedCharacter'));
 });
 
 randomExample.addEventListener('click', () => {
   const [desired, perceived] = examples[Math.floor(Math.random() * examples.length)];
   document.querySelector('#desiredCharacter').value = desired;
   document.querySelector('#perceivedCharacter').value = perceived;
-  compareCharacters(desired, perceived);
+  compareCharactersSmart(desired, perceived);
 });
