@@ -1,16 +1,16 @@
 services:
   - type: web
-    name: espejo-biblico-api
+    name: dinamica-gemini-api
     env: node
     rootDir: backend
     buildCommand: npm install
     startCommand: npm start
     envVars:
-      - key: OPENAI_API_KEY
+      - key: GEMINI_API_KEY
         sync: false
-      - key: OPENAI_MODEL
-        value: gpt-4.1-mini
+      - key: GEMINI_MODEL
+        value: gemini-3.5-flash
       - key: ALLOWED_ORIGINS
-        value: https://alejandro-zg.github.io,http://localhost:5500,http://127.0.0.1:5500
+        value: https://alejandro-zg.github.io
       - key: MAX_REQUESTS_PER_WINDOW
         value: 30

@@ -1,49 +1,29 @@
-# Espejo Bíblico - DINAMICA
+# Espejo Bíblico - Gemini Ready
 
-Aplicación web sencilla para una dinámica cristiana con jóvenes dentro de la iglesia.
+App web estática para GitHub Pages con backend en Render usando Gemini API.
 
-La dinámica compara de forma respetuosa:
+## Frontend
 
-- El personaje bíblico al que una persona desea parecerse.
-- El personaje bíblico al que otra persona cree que actualmente se parece.
+GitHub Pages usa:
 
-El resultado muestra un porcentaje simbólico, características, similitudes, contraste, reflexión, versículos y un reto semanal.
+- `index.html`
+- `style.css`
+- `script.js`
+- `config.js`
 
-## Objetivo
+En `config.js` debe estar tu endpoint de Render:
 
-Usar la tecnología como apoyo para una conversación espiritual ordenada, sin burlas ni señalamientos.
-
-## Archivos principales
-
-```txt
-index.html
-style.css
-script.js
-.nojekyll
-DEPLOY_GITHUB.md
-api-ready/
+```js
+window.ESPEJO_API_URL = 'https://dinamica-e7eh.onrender.com/api/comparar';
 ```
 
-## Uso local
+## Backend
 
-Abre `index.html` en tu navegador.
+Render debe apuntar a la carpeta `backend` y usar las variables:
 
-## Publicación remota
-
-El repositorio indicado es:
-
-```txt
-https://github.com/Alejandro-ZG/DINAMICA.git
+```env
+GEMINI_API_KEY=tu_api_key_de_gemini
+GEMINI_MODEL=gemini-3.5-flash
+ALLOWED_ORIGINS=https://alejandro-zg.github.io
+MAX_REQUESTS_PER_WINDOW=30
 ```
-
-Cuando actives GitHub Pages, el enlace esperado será:
-
-```txt
-https://alejandro-zg.github.io/DINAMICA/
-```
-
-## Nota sobre API
-
-La versión principal funciona sin API para poder publicarse en GitHub Pages sin exponer claves privadas.
-
-Si quieres conectarla a OpenAI, usa la carpeta `api-ready` como base para un backend. No pongas tu API key dentro del HTML o JavaScript público.

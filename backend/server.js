@@ -1,10 +1,10 @@
 import express from 'express';
 import cors from 'cors';
 import 'dotenv/config';
-import OpenAI from 'openai';
+import { GoogleGenAI } from '@google/genai';
 
 const app = express();
-const client = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
+const ai = new GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY });
 
 const allowedOrigins = (process.env.ALLOWED_ORIGINS || '')
   .split(',')
@@ -60,8 +60,53 @@ function rateLimit(req, res, next) {
   next();
 }
 
+const comparacionSchema = {
+  type: 'object',
+  additionalProperties: false,
+  properties: {
+    porcentaje: {
+      type: 'number',
+      description: 'Porcentaje simbólico de acercamiento entre 0 y 100.'
+    },
+    personajeDeseado: { type: 'string' },
+    personajePercibido: { type: 'string' },
+    resumenDeseado: { type: 'string' },
+    resumenPercibido: { type: 'string' },
+    caracteristicasDeseado: {
+      type: 'array',
+      items: { type: 'string' }
+    },
+    caracteristicasPercibido: {
+      type: 'array',
+      items: { type: 'string' }
+    },
+    similitudes: {
+      type: 'array',
+      items: { type: 'string' }
+    },
+    contraste: { type: 'string' },
+    reflexion: { type: 'string' },
+    versiculo: { type: 'string' },
+    reto: { type: 'string' }
+  },
+  required: [
+    'porcentaje',
+    'personajeDeseado',
+    'personajePercibido',
+    'resumenDeseado',
+    'resumenPercibido',
+    'caracteristicasDeseado',
+    'caracteristicasPercibido',
+    'similitudes',
+    'contraste',
+    'reflexion',
+    'versiculo',
+    'reto'
+  ]
+};
+
 app.get('/', (req, res) => {
-  res.json({ ok: true, service: 'Espejo Bíblico API' });
+  res.json({ ok: true, service: 'Espejo Bíblico API con Gemini' });
 });
 
 app.get('/health', (req, res) => {
@@ -70,6 +115,10 @@ app.get('/health', (req, res) => {
 
 app.post('/api/comparar', rateLimit, async (req, res) => {
   try {
+    if (!process.env.GEMINI_API_KEY) {
+      return res.status(500).json({ error: 'Falta configurar GEMINI_API_KEY en Render.' });
+    }
+
     const personajeDeseado = String(req.body?.personajeDeseado || '').trim();
     const personajePercibido = String(req.body?.personajePercibido || '').trim();
 
@@ -87,9 +136,7 @@ app.post('/api/comparar', rateLimit, async (req, res) => {
       });
     }
 
-    const response = await client.responses.create({
-      model: process.env.OPENAI_MODEL || 'gpt-4.1-mini',
-      input: `
+    const prompt = `
 Actúa como un guía cristiano para jóvenes dentro de una iglesia.
 
 Compara estos dos personajes bíblicos:
@@ -99,57 +146,31 @@ Compara estos dos personajes bíblicos:
 La respuesta debe ser respetuosa, edificante, clara para jóvenes y útil para una dinámica dentro de la iglesia.
 No uses tono de burla. No ataques a la persona. No presentes el porcentaje como verdad absoluta.
 El porcentaje debe ser simbólico y servir solo como punto de reflexión.
-      `.trim(),
-      text: {
-        format: {
-          type: 'json_schema',
-          name: 'comparacion_biblica',
-          strict: true,
-          schema: {
-            type: 'object',
-            additionalProperties: false,
-            properties: {
-              porcentaje: { type: 'number' },
-              personajeDeseado: { type: 'string' },
-              personajePercibido: { type: 'string' },
-              resumenDeseado: { type: 'string' },
-              resumenPercibido: { type: 'string' },
-              caracteristicasDeseado: { type: 'array', items: { type: 'string' } },
-              caracteristicasPercibido: { type: 'array', items: { type: 'string' } },
-              similitudes: { type: 'array', items: { type: 'string' } },
-              contraste: { type: 'string' },
-              reflexion: { type: 'string' },
-              versiculo: { type: 'string' },
-              reto: { type: 'string' }
-            },
-            required: [
-              'porcentaje',
-              'personajeDeseado',
-              'personajePercibido',
-              'resumenDeseado',
-              'resumenPercibido',
-              'caracteristicasDeseado',
-              'caracteristicasPercibido',
-              'similitudes',
-              'contraste',
-              'reflexion',
-              'versiculo',
-              'reto'
-            ]
-          }
-        }
+Devuelve una comparación equilibrada: fortalezas, proceso, contraste, versículo y reto práctico.
+    `.trim();
+
+    const interaction = await ai.interactions.create({
+      model: process.env.GEMINI_MODEL || 'gemini-3.5-flash',
+      input: prompt,
+      response_format: {
+        type: 'text',
+        mime_type: 'application/json',
+        schema: comparacionSchema
       }
     });
 
-    const data = JSON.parse(response.output_text);
+    const data = JSON.parse(interaction.output_text);
     res.json(data);
   } catch (error) {
     console.error('Error en /api/comparar:', error);
-    res.status(500).json({ error: 'No se pudo generar la comparación bíblica.' });
+    res.status(500).json({
+      error: 'No se pudo generar la comparación bíblica con Gemini.',
+      detail: process.env.NODE_ENV === 'production' ? undefined : String(error?.message || error)
+    });
   }
 });
 
 const port = process.env.PORT || 3000;
 app.listen(port, '0.0.0.0', () => {
-  console.log(`Espejo Bíblico API activo en puerto ${port}`);
+  console.log(`Espejo Bíblico API con Gemini activo en puerto ${port}`);
 });
