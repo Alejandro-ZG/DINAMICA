@@ -2,4 +2,4 @@
 // Ejemplo:
 // window.ESPEJO_API_URL = 'https://espejo-biblico-api.onrender.com/api/comparar';
 
-window.ESPEJO_API_URL = 'https://dinamica-e7eh.onrender.com';
+window.ESPEJO_API_URL = 'https://dinamica-e7eh.onrender.com/api/comparar';
